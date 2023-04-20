@@ -38,3 +38,57 @@ if __name__ == '__main__':
 
 ```
 **both threads acquire locks in the same order (l1 before l2), which ensures that they will not end up waiting for each other to release the lock they hold. As a result, the code will not run into a deadlock situation.**
+
+## fix on c#
+```csharp
+using System;
+using System.Threading;
+
+class Program
+{
+    static object l1 = new object();
+    static object l2 = new object();
+
+    static void f1(string name)
+    {
+        Console.WriteLine("thread " + name + " about to lock l1");
+        lock (l1)
+        {
+            Console.WriteLine("thread " + name + " has lock l1");
+            Thread.Sleep(300);
+            Console.WriteLine("thread " + name + " about to lock l2");
+            lock (l2)
+            {
+                Console.WriteLine("thread " + name + " has lock l2");
+                Console.WriteLine("thread " + name + " has both locks");
+            }
+        }
+    }
+
+    static void f2(string name)
+    {
+        Console.WriteLine("thread " + name + " about to lock l1");
+        lock (l1)
+        {
+            Console.WriteLine("thread " + name + " has lock l1");
+            Thread.Sleep(300);
+            Console.WriteLine("thread " + name + " about to lock l2");
+            lock (l2)
+            {
+                Console.WriteLine("thread " + name + " has lock l2");
+                Console.WriteLine("thread " + name + " has both locks");
+            }
+        }
+    }
+
+    static void Main()
+    {
+        Thread t1 = new Thread(() => f1("t1"));
+        Thread t2 = new Thread(() => f2("t2"));
+
+        t1.Start();
+        t2.Start();
+    }
+}
+
+```
